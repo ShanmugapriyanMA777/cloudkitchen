@@ -10,7 +10,9 @@ import { MENU_ITEMS } from './src/data/menu';
 // Load environment variables
 dotenv.config();
 
-const DB_PATH = path.join(process.cwd(), 'database.json');
+const DB_PATH = process.env.VERCEL
+  ? path.join('/tmp', 'database.json')
+  : path.join(process.cwd(), 'database.json');
 
 interface DatabaseSchema {
   menu: MenuItem[];
@@ -453,13 +455,14 @@ const startOrderStatusSimulator = (orderId: string) => {
   });
 };
 
-async function startServer() {
-  const app = reportMissingConfigInConsole();
-  const PORT = 3000;
+const app = reportMissingConfigInConsole();
 
-  // Support JSON and urlencode parsing
-  app.use(express.json());
-  app.use(express.urlencoded({ extended: true }));
+// Support JSON and urlencode parsing
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+async function startServer() {
+  const PORT = 3000;
 
   // API: Get Menu
   app.get('/api/menu', async (req, res) => {
@@ -842,13 +845,13 @@ CREATE TABLE public.order_items (
   });
 
   // Serve static UI assets and handle spa route fallback in production
-  if (process.env.NODE_ENV !== 'production') {
+  if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: 'spa',
     });
     app.use(vite.middlewares);
-  } else {
+  } else if (!process.env.VERCEL) {
     const distPath = path.join(process.cwd(), 'dist');
     app.use(express.static(distPath));
     app.get('*', (req, res) => {
@@ -856,9 +859,11 @@ CREATE TABLE public.order_items (
     });
   }
 
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(`BiteCraft Server running on host http://0.0.0.0:${PORT}`);
-  });
+  if (!process.env.VERCEL) {
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`BiteCraft Server running on host http://0.0.0.0:${PORT}`);
+    });
+  }
 }
 
 function reportMissingConfigInConsole() {
@@ -873,4 +878,8 @@ function reportMissingConfigInConsole() {
   return app;
 }
 
-startServer();
+if (!process.env.VERCEL) {
+  startServer();
+}
+
+export default app;
