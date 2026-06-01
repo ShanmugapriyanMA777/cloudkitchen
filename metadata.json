@@ -1,0 +1,6 @@
+{
+  "name": "BiteCraft Kitchen",
+  "description": "A premium, conversion-focused cloud kitchen platform featuring a highly optimized menu, stateful shopping cart, multi-step secure checkout, real-time-simulated delivery tracking, and a comprehensive admin analytics dashboard.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
