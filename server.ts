@@ -461,20 +461,17 @@ const app = reportMissingConfigInConsole();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-async function startServer() {
-  const PORT = 3000;
-
-  // API: Get Menu
-  app.get('/api/menu', async (req, res) => {
-    const supabase = getSupabaseClient();
-    if (supabase) {
-      const menu = await fetchMenuFromSupabase(supabase);
-      if (menu) {
-        return res.json(menu);
-      }
+// API: Get Menu
+app.get('/api/menu', async (req, res) => {
+  const supabase = getSupabaseClient();
+  if (supabase) {
+    const menu = await fetchMenuFromSupabase(supabase);
+    if (menu) {
+      return res.json(menu);
     }
-    res.json(getMenuFromDB());
-  });
+  }
+  res.json(getMenuFromDB());
+});
 
   // API: Checkout & Create Razorpay Order Simulator
   app.post('/api/checkout', async (req, res) => {
@@ -844,6 +841,9 @@ CREATE TABLE public.order_items (
     res.type('text/plain').send(ddl);
   });
 
+async function startLocalServer() {
+  const PORT = 3000;
+
   // Serve static UI assets and handle spa route fallback in production
   if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
     const vite = await createViteServer({
@@ -879,7 +879,7 @@ function reportMissingConfigInConsole() {
 }
 
 if (!process.env.VERCEL) {
-  startServer();
+  startLocalServer();
 }
 
 export default app;
