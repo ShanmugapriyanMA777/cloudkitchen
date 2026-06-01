@@ -5,6 +5,7 @@ export interface MenuItem {
   price: number;
   category: 'starters' | 'mains' | 'desserts' | 'beverages' | 'combos';
   image: string;
+  video?: string;
   isVeg: boolean;
   rating: number;
   isPopular?: boolean;

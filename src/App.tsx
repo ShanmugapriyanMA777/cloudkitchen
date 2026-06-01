@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ChefHat, ShoppingBag, MapPin, Sparkles, AlertCircle, TrendingUp, Compass, Heart, Loader2 } from 'lucide-react';
+import { ChefHat, ShoppingBag, MapPin, Sparkles, AlertCircle, TrendingUp, Compass, Heart, Loader2, Video, Volume2, VolumeX, Eye, Flame, ShieldCheck } from 'lucide-react';
 import { Navbar } from './components/Navbar';
 import { MenuCard } from './components/MenuCard';
 import { CartDrawer } from './components/CartDrawer';
@@ -25,6 +25,20 @@ export default function App() {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [loadingMenu, setLoadingMenu] = useState(true);
   const [menuError, setMenuError] = useState<string | null>(null);
+
+  // Live stream active camera stream selection
+  const [activeCam, setActiveCam] = useState<'main' | 'grill' | 'chopping' | 'frying' | 'stir'>('main');
+  const [liveMuted, setLiveMuted] = useState(true);
+
+  const cameras = [
+    { id: 'main' as const, label: 'Main Kitchen Desk', url: 'https://player.vimeo.com/external/435674703.sd.mp4?s=7a91672322a36b3cf7d5c92c90c793ff06c88f11&profile_id=165&oauth2_token_id=57447761', desc: 'Prepping starters and dessert plating' },
+    { id: 'grill' as const, label: 'Grill Station', url: 'https://player.vimeo.com/external/434045526.sd.mp4?s=c27d2abde547a1e05d9c8debaec806746862e307&profile_id=165&oauth2_token_id=57447761', desc: 'Gourmet burgers and chicken searing' },
+    { id: 'chopping' as const, label: 'Chopping Desk', url: 'https://player.vimeo.com/external/409217646.sd.mp4?s=9108c9d2243d52c1e7f607d7301c80b4ec748de8&profile_id=165&oauth2_token_id=57447761', desc: 'Knife-skills and organic salad slicing' },
+    { id: 'frying' as const, label: 'Frying Unit', url: 'https://player.vimeo.com/external/371433846.sd.mp4?s=236da2f3c054273b18510682260ae5d67cb92336&profile_id=165&oauth2_token_id=57447761', desc: 'Crisping artisanal potato cuts' },
+    { id: 'stir' as const, label: 'Sauté Base', url: 'https://player.vimeo.com/external/510850877.sd.mp4?s=d31e9dbec9f44fa6724b330368b693e0b83dc940&profile_id=165&oauth2_token_id=57447761', desc: 'Simmering slow sauces and curries' }
+  ];
+
+  const currentCam = cameras.find(c => c.id === activeCam) || cameras[0];
 
   // Handle HTML document body theme class synchronization
   useEffect(() => {
@@ -93,7 +107,7 @@ export default function App() {
           />
         </main>
       ) : (
-        <main className="whitespace-normal pb-16">
+        <main className="whitespace-normal pb-16 animate-fade-in">
           {/* Brand Presentation HERO BANNER Section */}
           <section className="relative overflow-hidden py-16 sm:py-24 border-b border-white/5 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-zinc-900/40 via-[#050505] to-[#050505]">
             {/* Ambient vector halos */}
@@ -146,10 +160,127 @@ export default function App() {
                         setActiveOrderId(id.trim());
                       }
                     }}
-                    className="px-5 py-3 rounded-full text-xs font-semibold uppercase tracking-wider border border-white/10 bg-white/5 text-zinc-300 hover:bg-white/10 transition-all active:scale-95 duration-200"
+                    className="px-5 py-3 rounded-full text-xs font-semibold uppercase tracking-wider border border-white/10 bg-white/5 text-zinc-300 hover:bg-white/10 transition-all active:scale-95 duration-200 cursor-pointer"
                   >
                     Track Live Position
                   </button>
+                </div>
+
+              </div>
+            </div>
+          </section>
+
+          {/* Interactive Live Kitchen Feed Panel */}
+          <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+            <div className="rounded-[2.5rem] overflow-hidden border border-white/5 bg-[#0a0a0a] p-5 sm:p-8 flex flex-col lg:flex-row gap-8 items-center hover:border-white/10 transition-all duration-300">
+              
+              {/* Left Column: Live camera player */}
+              <div className="w-full lg:w-3/5 flex flex-col space-y-4">
+                <div className="relative aspect-video rounded-3xl overflow-hidden bg-zinc-950 border border-white/10 group shadow-2xl">
+                  
+                  {/* Actual looping video stream */}
+                  <video
+                    key={activeCam}
+                    src={currentCam.url}
+                    autoPlay
+                    loop
+                    muted={liveMuted}
+                    playsInline
+                    className="w-full h-full object-cover transition-opacity duration-300"
+                  />
+
+                  {/* Overlays: Live indicator */}
+                  <div className="absolute top-4 left-4 z-10 flex items-center space-x-2 px-3 py-1.5 rounded-full bg-zinc-950/80 backdrop-blur-md border border-white/10">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                    </span>
+                    <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-white">Live Broadcast</span>
+                    <span className="text-[#9C9C9C] text-[10px] font-mono font-bold tracking-widest">| NCR-01</span>
+                  </div>
+
+                  {/* Right Overlay: Camera designation tag */}
+                  <div className="absolute top-4 right-4 z-10 px-3 py-1.5 rounded-full bg-zinc-950/80 backdrop-blur-md border border-white/10 text-[9px] font-mono text-orange-400 font-bold uppercase tracking-wider">
+                    Cam: {currentCam.label}
+                  </div>
+
+                  {/* Bottom Control Bar Overlay */}
+                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-4 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="flex items-center space-x-2">
+                      <Video className="w-4 h-4 text-orange-500 animate-pulse" />
+                      <span className="text-xs text-white font-mono">{currentCam.desc}</span>
+                    </div>
+                    
+                    {/* Audio Toggle */}
+                    <button
+                      onClick={() => setLiveMuted(!liveMuted)}
+                      className="p-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-white transition-colors cursor-pointer"
+                    >
+                      {liveMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4 text-orange-500" />}
+                    </button>
+                  </div>
+
+                </div>
+
+                {/* Subtext info */}
+                <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-zinc-500 font-mono font-bold pl-1 uppercase tracking-wider">
+                  <div className="flex items-center space-x-1.5">
+                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
+                    <span>HACCP Standard Controlled Node Feed</span>
+                  </div>
+                  <div>
+                    <span>Stream resolution: 1080p @ 60 FPS • Encrypted</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column: Camera controllers & description */}
+              <div className="w-full lg:w-2/5 space-y-6 flex flex-col justify-center">
+                <div className="space-y-2">
+                  <div className="inline-flex items-center space-x-1 bg-orange-600/10 text-orange-400 px-3 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider">
+                    <Eye className="w-3 h-3" />
+                    <span>Real-world Cloud Transparency</span>
+                  </div>
+                  <h2 className="text-2xl font-serif italic text-white leading-tight">
+                    Watch our Artisans LIVE
+                  </h2>
+                  <p className="text-xs text-zinc-400 font-light leading-relaxed">
+                    At BiteCraft, transparency is our premium trademark. Monitor our kitchen stations live as experienced chefs prepare, grill, and pack gourmet orders. No pre-recorded trickery — what you see is what you experience.
+                  </p>
+                </div>
+
+                {/* Station camera selection grid */}
+                <div className="space-y-2.5">
+                  <span className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono">
+                    Select Feed Stream ({cameras.length} CAMERAS ONLINE):
+                  </span>
+                  
+                  <div className="space-y-2">
+                    {cameras.map((cam) => (
+                      <button
+                        key={cam.id}
+                        onClick={() => setActiveCam(cam.id)}
+                        className={`w-full flex items-center justify-between p-3 rounded-2xl border text-left transition-all duration-200 cursor-pointer ${
+                          activeCam === cam.id
+                            ? 'bg-orange-600/10 border-orange-500/50 text-white'
+                            : 'bg-white/[0.01] border-white/5 text-zinc-400 hover:bg-white/5 hover:text-white'
+                        }`}
+                      >
+                        <div className="flex items-center space-x-2.5">
+                          <div className={`p-1.5 rounded-lg ${activeCam === cam.id ? 'bg-orange-600 text-white' : 'bg-white/5 text-zinc-500'}`}>
+                            <Video className="w-3.5 h-3.5" />
+                          </div>
+                          <div>
+                            <span className="block text-xs font-semibold leading-none">{cam.label}</span>
+                            <span className="block text-[10px] text-zinc-500 font-light mt-1">{cam.desc}</span>
+                          </div>
+                        </div>
+                        {activeCam === cam.id && (
+                          <span className="h-2 w-2 rounded-full bg-orange-500 animate-pulse" />
+                        )}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
               </div>

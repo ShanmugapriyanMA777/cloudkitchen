@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { DollarSign, ShoppingCart, UserCheck, BarChart3, Database, Copy, Check, Loader2, ArrowLeft, RefreshCw } from 'lucide-react';
 import { DashboardMetrics } from '../types';
+import { OrderHistory } from './OrderHistory';
 
 interface AdminDashboardProps {
   onBackToMenu: () => void;
@@ -332,6 +333,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToMenu }) 
         </div>
 
       </div>
+
+      {/* ORDER HISTORY LOG REGISTRY SECTION */}
+      <OrderHistory onOrderUpdated={fetchAdminMetrics} />
 
       {/* SCHEMA COPY SECTION */}
       <div className="rounded-[2rem] border border-white/5 bg-[#0a0a0a] p-5 sm:p-6 space-y-4 hover:border-white/10 transition-all duration-300">

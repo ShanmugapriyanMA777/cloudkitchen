@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Star, Clock, Flame, Plus, Minus, Check, MessageSquare } from 'lucide-react';
+import { Star, Clock, Flame, Plus, Minus, Check, MessageSquare, Play, X } from 'lucide-react';
 import { MenuItem } from '../types';
 import { useCartStore } from '../store/cartStore';
 
@@ -12,6 +12,7 @@ export const MenuCard: React.FC<MenuCardProps> = ({ item }) => {
   const [instructions, setInstructions] = useState('');
   const [showInstructionsForm, setShowInstructionsForm] = useState(false);
   const [justAdded, setJustAdded] = useState(false);
+  const [showVideoModal, setShowVideoModal] = useState(false);
 
   const cartItem = items.find((i) => i.id === item.id);
   const quantity = cartItem ? cartItem.quantity : 0;
@@ -62,6 +63,21 @@ export const MenuCard: React.FC<MenuCardProps> = ({ item }) => {
         />
         {/* Shadow Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-[#050505]/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        
+        {/* Floating Prep Video Button */}
+        {item.video && (
+          <button
+            id={`watch-prep-${item.id}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowVideoModal(true);
+            }}
+            className="absolute bottom-3 right-3 z-10 flex items-center space-x-1.5 px-3 py-1.5 rounded-full bg-zinc-950/85 border border-white/10 hover:border-orange-500/50 hover:bg-orange-600 hover:text-white text-[10px] font-mono font-bold uppercase tracking-wider text-orange-500 transition-all shadow-md active:scale-95 duration-200 cursor-pointer"
+          >
+            <Play className="w-2.5 h-2.5 fill-current" />
+            <span>Watch Recipes</span>
+          </button>
+        )}
       </div>
 
       {/* Specs bar (Prep time, rating, calories) */}
@@ -87,64 +103,80 @@ export const MenuCard: React.FC<MenuCardProps> = ({ item }) => {
         )}
       </div>
 
-      {/* Content */}
-      <div className="flex-1 flex flex-col justify-between p-5">
-        <div>
-          <h3 className="font-serif italic font-medium text-lg text-white tracking-tight leading-tight mb-1.5 group-hover:text-orange-500 transition-colors">
+      {/* Content wrapper */}
+      <div className="flex flex-1 flex-col justify-between p-5 space-y-4">
+        <div className="space-y-1.5">
+          <h3 className="font-serif italic text-base font-medium text-white group-hover:text-orange-500 transition-colors">
             {item.name}
           </h3>
-          <p className="text-xs text-zinc-450 text-zinc-400 leading-relaxed mb-4 line-clamp-2 font-light">
+          <p className="text-xs text-zinc-400 font-light leading-normal line-clamp-2">
             {item.description}
           </p>
         </div>
 
-        <div>
-          {/* Price & Action Row */}
-          <div className="flex items-center justify-between mt-auto">
-            <div className="flex flex-col">
-              <span className="text-[10px] uppercase font-mono font-bold tracking-widest text-zinc-500">Price</span>
-              <span className="text-lg font-mono font-bold text-white">
-                ₹{item.price}
-              </span>
-            </div>
+        <div className="pt-2 border-t border-dashed border-white/5">
+          <div className="flex items-center justify-between">
+            <span className="text-lg font-mono font-bold text-white tracking-tight">
+              ₹{item.price}
+            </span>
 
-            {/* Selector Button Controller */}
-            {quantity === 0 ? (
-              <div className="flex items-center space-x-1">
-                {/* Note Indicator */}
+            {quantity > 0 ? (
+              <div className="flex items-center space-x-2.5 bg-orange-600/10 border border-orange-500/20 px-2.5 py-1 rounded-full text-white">
                 <button
-                  onClick={() => setShowInstructionsForm(!showInstructionsForm)}
-                  className={`p-2 rounded-xl border transition-colors ${
-                    showInstructionsForm || instructions
-                      ? 'bg-orange-950/30 border-orange-500/30 text-orange-500'
-                      : 'text-zinc-500 border-white/10 hover:text-zinc-300 hover:bg-white/5'
-                  }`}
-                  title="Add Cooking Note"
-                >
-                  <MessageSquare className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={handleAdd}
-                  className="flex items-center justify-center space-x-1.5 px-4.5 py-2 rounded-xl text-xs font-semibold tracking-wider uppercase bg-orange-600 hover:bg-orange-500 text-white transition-all active:scale-95 duration-200 shadow-md shadow-orange-950/20 cursor-pointer"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                  <span>ADD</span>
-                </button>
-              </div>
-            ) : (
-              <div className="flex items-center bg-orange-600 rounded-xl text-white p-0.5 shadow-md shadow-orange-950/20">
-                <button
+                  id={`decrement-${item.id}`}
                   onClick={handleDecrement}
-                  className="p-1.5 hover:bg-white/10 rounded-lg transition-colors cursor-pointer"
+                  className="p-1 rounded-full text-orange-400 hover:text-white hover:bg-orange-600/20 active:scale-90 transition-all duration-150 cursor-pointer"
                 >
                   <Minus className="w-3.5 h-3.5" />
                 </button>
-                <span className="w-8 text-center text-xs font-mono font-bold">{quantity}</span>
+                <span className="font-mono text-xs font-bold w-4 text-center">
+                  {quantity}
+                </span>
                 <button
+                  id={`increment-${item.id}`}
                   onClick={handleIncrement}
-                  className="p-1.5 hover:bg-white/10 rounded-lg transition-colors cursor-pointer"
+                  className="p-1 rounded-full text-orange-400 hover:text-white hover:bg-orange-600/20 active:scale-90 transition-all duration-150 cursor-pointer"
                 >
                   <Plus className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center space-x-1">
+                {/* Note Toggle Button */}
+                <button
+                  id={`toggle-instructions-${item.id}`}
+                  onClick={() => setShowInstructionsForm(!showInstructionsForm)}
+                  className={`p-2 rounded-xl border transition-all active:scale-95 duration-200 cursor-pointer ${
+                    showInstructionsForm 
+                      ? 'bg-orange-500/10 border-orange-500/30 text-orange-400' 
+                      : 'bg-white/5 border-white/5 text-zinc-400 hover:text-white hover:bg-white/10'
+                  }`}
+                  title="Add direct customization instructions"
+                >
+                  <MessageSquare className="w-4 h-4" />
+                </button>
+
+                {/* Main Add Button */}
+                <button
+                  id={`add-to-cart-${item.id}`}
+                  onClick={handleAdd}
+                  className={`flex items-center space-x-1 px-4.5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-200 active:scale-95 cursor-pointer ${
+                    justAdded 
+                      ? 'bg-emerald-600 text-white font-mono' 
+                      : 'bg-white hover:bg-orange-600 hover:text-white text-zinc-950 font-sans'
+                  }`}
+                >
+                  {justAdded ? (
+                    <>
+                      <Check className="w-3.5 h-3.5 animate-bounce" />
+                      <span>Added</span>
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Order</span>
+                    </>
+                  )}
                 </button>
               </div>
             )}
@@ -159,23 +191,25 @@ export const MenuCard: React.FC<MenuCardProps> = ({ item }) => {
               <textarea
                 value={instructions}
                 onChange={(e) => setInstructions(e.target.value)}
-                placeholder="E.g., Make it extra spicy, no onions, etc."
-                className="w-full text-xs p-2 rounded-xl border border-white/10 bg-[#050505] text-zinc-200 outline-none focus:border-orange-500 resize-none h-14 font-light"
+                placeholder="E.g., Make it extra spicy, cooked rare, etc."
+                className="w-full text-xs p-2 rounded-xl border border-white/10 bg-[#05055] bg-[#050505] text-zinc-200 outline-none focus:border-orange-500 resize-none h-14 font-light"
                 maxLength={100}
               />
               <div className="flex justify-end space-x-1 mt-2">
                 <button
+                  id={`cancel-instructions-${item.id}`}
                   onClick={() => {
                     setInstructions('');
                     setShowInstructionsForm(false);
                   }}
-                  className="text-[10px] font-semibold px-2.5 py-1 text-zinc-500 hover:text-zinc-300"
+                  className="text-[10px] font-semibold px-2.5 py-1 text-zinc-500 hover:text-zinc-300 Cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
+                  id={`save-instructions-${item.id}`}
                   onClick={() => setShowInstructionsForm(false)}
-                  className="bg-white/5 text-[10px] font-semibold px-2.5 py-1 rounded-lg text-zinc-350 hover:bg-white/10 hover:text-white"
+                  className="bg-white/5 text-[10px] font-semibold px-2.5 py-1 rounded-lg text-zinc-350 hover:bg-white/10 hover:text-white cursor-pointer"
                 >
                   Save Note
                 </button>
@@ -191,6 +225,71 @@ export const MenuCard: React.FC<MenuCardProps> = ({ item }) => {
           )}
         </div>
       </div>
+
+      {/* Cooking Video Modal Overlays */}
+      {showVideoModal && item.video && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          {/* Backdrop blur clickoff */}
+          <div 
+            onClick={() => setShowVideoModal(false)}
+            className="fixed inset-0 bg-black/90 backdrop-blur-md transition-all duration-300"
+          />
+
+          {/* Video Player Shell */}
+          <div className="relative w-full max-w-lg bg-[#0C0C0C] border border-white/10 rounded-3xl overflow-hidden shadow-2xl flex flex-col z-10 animate-in fade-in zoom-in-95 duration-200">
+            
+            {/* Header bar */}
+            <div className="flex items-center justify-between p-4 border-b border-white/5 bg-black/40">
+              <div className="flex items-center space-x-2">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-500 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
+                </span>
+                <span className="text-[10px] font-mono font-bold text-orange-400 uppercase tracking-widest">
+                  Gourmet Kitchen Prep Loop
+                </span>
+              </div>
+              <button
+                id={`close-video-${item.id}`}
+                onClick={() => setShowVideoModal(false)}
+                className="p-1.5 rounded-lg text-zinc-500 hover:bg-white/5 hover:text-white transition-all cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Video content container of exact Aspect Ratio */}
+            <div className="relative aspect-video bg-black flex items-center justify-center">
+              <video
+                src={item.video}
+                autoPlay
+                loop
+                controls
+                className="w-full h-full object-cover"
+                playsInline
+              />
+            </div>
+
+            {/* Visual Description label */}
+            <div className="p-5 space-y-2">
+              <h3 className="font-serif italic font-medium text-base text-white">
+                {item.name}
+              </h3>
+              <p className="text-xs text-zinc-400 font-light leading-relaxed">
+                Watch our five-star chef's assembly process. Every ingredient is mindfully sourced, tossed, and crafted in a sanitized, thermal-sealed environment for ultimate kitchen fresh delivery.
+              </p>
+            </div>
+
+            {/* Footer stamp */}
+            <div className="bg-[#050505] p-3 border-t border-white/5 text-center">
+              <span className="text-[9px] text-zinc-500 font-mono">
+                BiteCraft Kitchens • Authenticated HD Culinary Feed
+              </span>
+            </div>
+
+          </div>
+        </div>
+      )}
     </div>
   );
 };
